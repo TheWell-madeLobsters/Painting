@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -77,18 +78,16 @@ public class Main {
                 int size;
                 for (size = maxSquare; size >= 3; size -= 2) {
                     if (rowPos + size <= rows && colPos + size <= columns) {
-                        if (checkForFullSquare(image, rowPos, colPos, size)) {
-                            squareFound = true;
+                        List<Instruction> deleteEmpty = checkForFullSquare(image, rowPos, colPos, size);
+                        if (deleteEmpty != null) {
+                            int rowCenter = rowPos + (size / 2);
+                            int colCenter = colPos + (size / 2);
+                            instructions.add(new PaintSquare(rowCenter, colCenter, size / 2));
+                            instructions.addAll(deleteEmpty);
+                            checked = areaIsUsed(checked, rowPos, colPos, rowPos + (size - 1), colPos + (size - 1));
                             break;
                         }
                     }
-                }
-                if (squareFound) {
-                    int rowCenter = rowPos + (size / 2);
-                    int colCenter = colPos + (size / 2);
-                    PaintSquare square = new PaintSquare(rowCenter, colCenter, size / 2);
-                    instructions.add(square);
-                    checked = areaIsUsed(checked, rowPos, colPos, rowPos + (size - 1), colPos + (size - 1));
                 }
             }
         }
@@ -156,15 +155,25 @@ public class Main {
         return instructions;
     }
 
-    public static boolean checkForFullSquare(Boolean[][] image, int startRow, int startCol, int size) {
+    public static List<Instruction> checkForFullSquare(Boolean[][] image, int startRow, int startCol, int size) {
+        int emptySpaces = 0;
+        List<Instruction> deleteEmpty = new ArrayList<>();
         for (int i = startRow; i < startRow + size; i++) {
             for (int j = startCol; j < startCol + size; j++) {
                 if (!image[i][j]) {
-                    return false;
+                    if(size > 3) {
+                        emptySpaces++;
+                        deleteEmpty.add(new EraseCell(i, j));
+                        if(emptySpaces >= (size / 2)) {
+                            return null;
+                        }
+                    } else {
+                        return null;
+                    }
                 }
             }
         }
-        return true;
+        return deleteEmpty;
     }
 
     public static Boolean[][] areaIsUsed(Boolean[][] checked, int startRow, int startCol, int endRow,
