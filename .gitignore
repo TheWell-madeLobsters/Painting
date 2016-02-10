@@ -53,7 +53,7 @@ local.properties
 
 
 ## NetBeans-specific ignore
-nbproject/private/
+nbproject/
 build/
 nbbuild/
 dist/
