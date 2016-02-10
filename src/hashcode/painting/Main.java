@@ -19,66 +19,106 @@ public class Main {
         process(RIGHT_ANGLE);
         process(LEARN_AND_TEACH);
     }
-
-    public static void process(String file) {
+    
+    public static List<Instruction> process(String file) {
         Boolean[][] image = readFile(file + ".in");
+        
+        int rows = image.length;
+        int columns = image[0].length;
+        
+        System.out.println("File: " + file + " has " + rows*columns + " cells in the file");
+        
+        List<Instruction> horizontal = processDirection(image, false);
+        List<Instruction> vertical = processDirection(image, true);
+        
+        List<Instruction> instructions = horizontal.size() < vertical.size() ? horizontal : vertical;
+        
+        printResult(instructions, rows * columns, file + ".out");
+        
+        return instructions;
+    }
 
+    public static List<Instruction> processDirection(Boolean[][] image, boolean vertical) {
         List<Instruction> instructions = new LinkedList<>();
 
         int rows = image.length;
         int columns = image[0].length;
-
-        System.out.println("File: " + file + " has " + rows*columns + " cells in the file");
 
         int maxSquare = rows > columns ? columns : rows;
         maxSquare = maxSquare % 2 == 0 ? maxSquare - 1 : maxSquare;
 
         Boolean[][] checked = generateEmpty(rows, columns);
 
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                if (checked[i][j]) {
+        int firstIndex, secondIndex;
+        if(vertical) {
+            firstIndex = columns;
+            secondIndex = rows;
+        } else {
+            firstIndex = rows;
+            secondIndex = columns;
+        }
+        
+        for (int i = 0; i < firstIndex; i++) {
+            for (int j = 0; j < secondIndex; j++) {
+                int rowPos, colPos;
+                if(vertical) {
+                    rowPos = j;
+                    colPos = i;
+                } else {
+                    rowPos = i;
+                    colPos = j;
+                }
+                
+                if (checked[rowPos][colPos]) {
                     continue;
                 }
                 //check squares
                 boolean squareFound = false;
                 int size;
                 for (size = maxSquare; size >= 3; size -= 2) {
-                    if (i + size <= rows && j + size <= columns) {
-                        if (checkForFullSquare(image, i, j, size)) {
+                    if (rowPos + size <= rows && colPos + size <= columns) {
+                        if (checkForFullSquare(image, rowPos, colPos, size)) {
                             squareFound = true;
                             break;
                         }
                     }
                 }
                 if (squareFound) {
-                    int rowCenter = i + (size / 2);
-                    int colCenter = j + (size / 2);
+                    int rowCenter = rowPos + (size / 2);
+                    int colCenter = colPos + (size / 2);
                     PaintSquare square = new PaintSquare(rowCenter, colCenter, size / 2);
                     instructions.add(square);
-                    checked = areaIsUsed(checked, i, j, i + (size - 1), j + (size - 1));
+                    checked = areaIsUsed(checked, rowPos, colPos, rowPos + (size - 1), colPos + (size - 1));
                 }
             }
         }
 
-        for (int i = 0; i < rows; i++) {
-
-            for (int j = 0; j < columns; j++) {
-                if (checked[i][j]) {
+        for (int i = 0; i < firstIndex; i++) {
+            for (int j = 0; j < secondIndex; j++) {
+                int rowPos, colPos;
+                if(vertical) {
+                    rowPos = j;
+                    colPos = i;
+                } else {
+                    rowPos = i;
+                    colPos = j;
+                }
+                
+                if (checked[rowPos][colPos]) {
                     continue;
                 }
-                checked[i][j] = true;
+                checked[rowPos][colPos] = true;
 
-                if (image[i][j]) {
-                    int endCol = j;
-                    int endRow = i;
+                if (image[rowPos][colPos]) {
+                    int endCol = colPos;
+                    int endRow = rowPos;
                     int lengthRow = 1;
                     int lengthCol = 1;
 
                     //check row length (controlling if cells haven't been already used by others)
-                    for (int colj = j + 1; colj < columns; colj++) {
-                        if (image[i][colj]) {
-                            if (!checked[i][colj]) {
+                    for (int colj = colPos + 1; colj < columns; colj++) {
+                        if (image[rowPos][colj]) {
+                            if (!checked[rowPos][colj]) {
                                 lengthRow++;
                             }
                             endCol++;
@@ -88,9 +128,9 @@ public class Main {
                     }
 
                     //check column length (controlling if cells haven't been already used by others)
-                    for (int rowi = i + 1; rowi < rows; rowi++) {
-                        if (image[rowi][j]) {
-                            if (!checked[rowi][j]) {
+                    for (int rowi = rowPos + 1; rowi < rows; rowi++) {
+                        if (image[rowi][colPos]) {
+                            if (!checked[rowi][colPos]) {
                                 lengthCol++;
                             }
                             endRow++;
@@ -101,19 +141,19 @@ public class Main {
 
                     //if row is longer than column -> then use row and delete it from map, use column otherwise
                     if (lengthRow > lengthCol) {
-                        PaintLine line = new PaintLine(i, j, i, endCol);
+                        PaintLine line = new PaintLine(rowPos, colPos, rowPos, endCol);
                         instructions.add(line);
-                        checked = areaIsUsed(checked, i, j, i, endCol);
+                        checked = areaIsUsed(checked, rowPos, colPos, rowPos, endCol);
                     } else {
-                        PaintLine line = new PaintLine(i, j, endRow, j);
+                        PaintLine line = new PaintLine(rowPos, colPos, endRow, colPos);
                         instructions.add(line);
-                        checked = areaIsUsed(checked, i, j, endRow, j);
+                        checked = areaIsUsed(checked, rowPos, colPos, endRow, colPos);
                     }
                 }
             }
         }
 
-        printResult(instructions, rows * columns, file + ".out");
+        return instructions;
     }
 
     public static boolean checkForFullSquare(Boolean[][] image, int startRow, int startCol, int size) {
