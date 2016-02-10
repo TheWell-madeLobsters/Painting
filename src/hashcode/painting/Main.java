@@ -10,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Main {
-
     public static String LOGO = "logo";
     public static String RIGHT_ANGLE = "right_angle";
     public static String LEARN_AND_TEACH = "learn_and_teach";
@@ -28,6 +27,8 @@ public class Main {
 
         int rows = image.length;
         int columns = image[0].length;
+
+        System.out.println("File: " + file + " has " + rows*columns + " cells in the file");
 
         int maxSquare = rows > columns ? columns : rows;
         maxSquare = maxSquare % 2 == 0 ? maxSquare - 1 : maxSquare;
@@ -112,7 +113,7 @@ public class Main {
             }
         }
 
-        printResult(instructions, file + ".out");
+        printResult(instructions, rows * columns, file + ".out");
     }
 
     public static boolean checkForFullSquare(Boolean[][] image, int startRow, int startCol, int size) {
@@ -140,15 +141,17 @@ public class Main {
         Boolean[][] empty = new Boolean[rows][];
         for (int i = 0; i < rows; i++) {
             empty[i] = new Boolean[columns];
-            for (int j = 0; j < columns; j++) {
+            for(int j = 0; j < columns; j++) {
                 empty[i][j] = false;
             }
         }
         return empty;
     }
 
-    public static void printResult(List<Instruction> instructions, String file) {
+    public static void printResult(List<Instruction> instructions, int size, String file) {
         PrintWriter writer = null;
+        System.out.println("File: " + file + " has " + size + " cells, " + instructions.size() + " instructions needed");
+        System.out.println("SCORE: " + (size - instructions.size()));
         try {
             writer = new PrintWriter(file, "UTF-8");
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
@@ -175,6 +178,7 @@ public class Main {
             int columns = Integer.parseInt(size[1]);
 
             image = new Boolean[rows][];
+            int count = 0;
             for (int i = 0; i < rows; i++) {
                 image[i] = new Boolean[columns];
 
@@ -183,12 +187,14 @@ public class Main {
                 for (int j = 0; j < columns; j++) {
                     char cell = sCurrentLine.charAt(j);
                     if (cell == '#') {
+                        count++;
                         image[i][j] = true;
                     } else {
                         image[i][j] = false;
                     }
                 }
             }
+            System.out.println("File: " + file + " has " + count + " hashes in the file");
 
         } catch (IOException e) {
             e.printStackTrace();
