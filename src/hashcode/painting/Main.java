@@ -34,7 +34,7 @@ public class Main {
 
         List<Instruction> instructions = horizontal.size() < vertical.size() ? horizontal : vertical;
 
-        printResult(instructions, rows * columns, "output/" + file + ".out");
+        printResult(instructions, rows * columns, file + ".out");
 
         return instructions;
     }
@@ -196,7 +196,7 @@ public class Main {
                 + " instructions needed");
         System.out.println("SCORE: " + (size - instructions.size()));
         try {
-            writer = new PrintWriter(file, "UTF-8");
+            writer = new PrintWriter("output/" + file, "UTF-8");
         } catch (FileNotFoundException | UnsupportedEncodingException e) {
             e.printStackTrace();
         }
