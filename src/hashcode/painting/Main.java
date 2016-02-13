@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Main {
+
     public static String LOGO = "logo";
     public static String RIGHT_ANGLE = "right_angle";
     public static String LEARN_AND_TEACH = "learn_and_teach";
@@ -19,22 +20,22 @@ public class Main {
         process(RIGHT_ANGLE);
         process(LEARN_AND_TEACH);
     }
-    
+
     public static List<Instruction> process(String file) {
-        Boolean[][] image = readFile(file + ".in");
-        
+        Boolean[][] image = readFile("input/" + file + ".in");
+
         int rows = image.length;
         int columns = image[0].length;
-        
-        System.out.println("File: " + file + " has " + rows*columns + " cells in the file");
-        
+
+        System.out.println("File: " + file + " has " + rows * columns + " cells in the file");
+
         List<Instruction> horizontal = processDirection(image, false);
         List<Instruction> vertical = processDirection(image, true);
-        
+
         List<Instruction> instructions = horizontal.size() < vertical.size() ? horizontal : vertical;
-        
-        printResult(instructions, rows * columns, file + ".out");
-        
+
+        printResult(instructions, rows * columns, "output/" + file + ".out");
+
         return instructions;
     }
 
@@ -50,25 +51,25 @@ public class Main {
         Boolean[][] checked = generateEmpty(rows, columns);
 
         int firstIndex, secondIndex;
-        if(vertical) {
+        if (vertical) {
             firstIndex = columns;
             secondIndex = rows;
         } else {
             firstIndex = rows;
             secondIndex = columns;
         }
-        
+
         for (int i = 0; i < firstIndex; i++) {
             for (int j = 0; j < secondIndex; j++) {
                 int rowPos, colPos;
-                if(vertical) {
+                if (vertical) {
                     rowPos = j;
                     colPos = i;
                 } else {
                     rowPos = i;
                     colPos = j;
                 }
-                
+
                 if (checked[rowPos][colPos]) {
                     continue;
                 }
@@ -88,7 +89,8 @@ public class Main {
                     int colCenter = colPos + (size / 2);
                     PaintSquare square = new PaintSquare(rowCenter, colCenter, size / 2);
                     instructions.add(square);
-                    checked = areaIsUsed(checked, rowPos, colPos, rowPos + (size - 1), colPos + (size - 1));
+                    checked = areaIsUsed(checked, rowPos, colPos, rowPos + (size - 1), colPos
+                                         + (size - 1));
                 }
             }
         }
@@ -96,14 +98,14 @@ public class Main {
         for (int i = 0; i < firstIndex; i++) {
             for (int j = 0; j < secondIndex; j++) {
                 int rowPos, colPos;
-                if(vertical) {
+                if (vertical) {
                     rowPos = j;
                     colPos = i;
                 } else {
                     rowPos = i;
                     colPos = j;
                 }
-                
+
                 if (checked[rowPos][colPos]) {
                     continue;
                 }
@@ -181,7 +183,7 @@ public class Main {
         Boolean[][] empty = new Boolean[rows][];
         for (int i = 0; i < rows; i++) {
             empty[i] = new Boolean[columns];
-            for(int j = 0; j < columns; j++) {
+            for (int j = 0; j < columns; j++) {
                 empty[i][j] = false;
             }
         }
@@ -190,7 +192,8 @@ public class Main {
 
     public static void printResult(List<Instruction> instructions, int size, String file) {
         PrintWriter writer = null;
-        System.out.println("File: " + file + " has " + size + " cells, " + instructions.size() + " instructions needed");
+        System.out.println("File: " + file + " has " + size + " cells, " + instructions.size()
+                + " instructions needed");
         System.out.println("SCORE: " + (size - instructions.size()));
         try {
             writer = new PrintWriter(file, "UTF-8");
